@@ -3,9 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EssAttendanceController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\OvertimeController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -28,6 +32,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
         Route::put('/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employee.manage')->name('update');
         Route::post('/{employee}/transition', [EmployeeController::class, 'transition'])->middleware('permission:employee.manage')->name('transition');
+    });
+
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('/', [AttendanceController::class, 'index'])->middleware('permission:attendance.view')->name('index');
+        Route::get('/roster', [AttendanceController::class, 'roster'])->middleware('permission:attendance.manage')->name('roster');
+        Route::post('/roster', [AttendanceController::class, 'storeRoster'])->middleware('permission:attendance.manage')->name('roster.store');
+    });
+
+    Route::prefix('ess')->name('ess.')->group(function () {
+        Route::get('/attendance', [EssAttendanceController::class, 'index'])->name('attendance');
+        Route::post('/attendance/clock-in', [EssAttendanceController::class, 'clockIn'])->name('clock-in');
+        Route::post('/attendance/clock-out', [EssAttendanceController::class, 'clockOut'])->name('clock-out');
+    });
+
+    Route::prefix('leaves')->name('leaves.')->group(function () {
+        Route::get('/', [LeaveController::class, 'index'])->name('index');
+        Route::post('/', [LeaveController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('overtime')->name('overtime.')->group(function () {
+        Route::get('/', [OvertimeController::class, 'index'])->name('index');
+        Route::post('/', [OvertimeController::class, 'store'])->name('store');
     });
 
     Route::prefix('approvals')->name('approvals.')->group(function () {
