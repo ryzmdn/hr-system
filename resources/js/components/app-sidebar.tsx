@@ -1,5 +1,14 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Building2,
+    CheckSquare,
+    FolderGit2,
+    GitBranch,
+    LayoutGrid,
+    ShieldAlert,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -22,6 +31,31 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Organisasi & Cabang',
+        href: '/organization',
+        icon: Building2,
+    },
+    {
+        title: 'Direktori Karyawan',
+        href: '/employees',
+        icon: Users,
+    },
+    {
+        title: 'Pusat Approval',
+        href: '/approvals',
+        icon: CheckSquare,
+    },
+    {
+        title: 'Alur Workflow',
+        href: '/approvals/workflows',
+        icon: GitBranch,
+    },
+    {
+        title: 'Jejak Audit Log',
+        href: '/audit-logs',
+        icon: ShieldAlert,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -31,8 +65,8 @@ const footerNavItems: NavItem[] = [
         icon: FolderGit2,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        title: 'Dokumentasi HRIS',
+        href: '/organization',
         icon: BookOpen,
     },
 ];
