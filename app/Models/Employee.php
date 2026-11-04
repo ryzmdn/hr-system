@@ -117,5 +117,20 @@ class Employee extends Model
 
         return $history ? (float) $history->base_salary : 0.0;
     }
+
+    public function salaryComponents(): HasMany
+    {
+        return $this->hasMany(EmployeeSalaryComponent::class);
+    }
+
+    public function loans(): HasMany
+    {
+        return $this->hasMany(EmployeeLoan::class);
+    }
+
+    public function payslips(): HasMany
+    {
+        return $this->hasMany(Payslip::class);
+    }
 }
 
