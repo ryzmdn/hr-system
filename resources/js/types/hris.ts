@@ -207,3 +207,86 @@ export interface PaginatedData<T> {
     next_page_url: string | null;
 }
 
+export interface ShiftTemplateItem {
+    id: number;
+    code: string;
+    name: string;
+    start_time: string;
+    end_time: string;
+    is_cross_day: boolean;
+    break_minutes: number;
+    grace_period_minutes: number;
+    is_active: boolean;
+}
+
+export interface EmployeeRosterItem {
+    id: number;
+    employee_id: number;
+    date: string;
+    shift_name: string;
+    shift_code: string;
+    is_off_day: boolean;
+}
+
+export interface AttendanceLiveLog {
+    id: number;
+    employee_name: string;
+    employee_nik: string;
+    branch_name: string;
+    type: string;
+    type_label: string;
+    recorded_at: string;
+    distance_meters: number;
+    is_within_geofence: boolean;
+    verification_status: string;
+    verification_label: string;
+    selfie_url: string | null;
+}
+
+export interface LeaveTypeItem {
+    id: number;
+    code: string;
+    name: string;
+    default_quota: number;
+    is_paid: boolean;
+    requires_attachment: boolean;
+    max_consecutive_days: number | null;
+    is_active: boolean;
+}
+
+export interface LeaveBalanceItem {
+    id: number;
+    leave_type_name: string;
+    allocated_days: number;
+    used_days: number;
+    remaining_days: number;
+}
+
+export interface LeaveRequestItem {
+    id: number;
+    employee_name: string;
+    employee_nik: string;
+    leave_type_name: string;
+    start_date: string;
+    end_date: string;
+    total_days: number;
+    reason: string;
+    status: string;
+    created_at: string;
+}
+
+export interface OvertimeRequestItem {
+    id: number;
+    employee_name: string;
+    employee_nik: string;
+    branch_name: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    is_holiday: boolean;
+    duration_hours: number;
+    calculated_overtime_hours: number;
+    estimated_pay: number;
+    reason: string;
+    status: string;
+}

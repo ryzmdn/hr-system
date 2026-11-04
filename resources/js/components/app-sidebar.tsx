@@ -2,11 +2,16 @@ import { Link } from '@inertiajs/react';
 import {
     BookOpen,
     Building2,
+    Calendar,
+    CalendarCheck,
     CheckSquare,
+    Clock,
+    Flame,
     FolderGit2,
     GitBranch,
     LayoutGrid,
     ShieldAlert,
+    Smartphone,
     Users,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -32,14 +37,39 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Organisasi & Cabang',
-        href: '/organization',
-        icon: Building2,
+        title: 'ESS Presensi Mobile',
+        href: '/ess/attendance',
+        icon: Smartphone,
+    },
+    {
+        title: 'Pengajuan Cuti',
+        href: '/leaves',
+        icon: CalendarCheck,
+    },
+    {
+        title: 'Lembur (SPL)',
+        href: '/overtime',
+        icon: Flame,
+    },
+    {
+        title: 'Monitoring Presensi',
+        href: '/attendance',
+        icon: Clock,
+    },
+    {
+        title: 'Jadwal & Roster Shift',
+        href: '/attendance/roster',
+        icon: Calendar,
     },
     {
         title: 'Direktori Karyawan',
         href: '/employees',
         icon: Users,
+    },
+    {
+        title: 'Organisasi & Cabang',
+        href: '/organization',
+        icon: Building2,
     },
     {
         title: 'Pusat Approval',
