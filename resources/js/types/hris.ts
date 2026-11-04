@@ -79,6 +79,8 @@ export interface EmployeeListItem {
     position: { id: number; name: string } | null;
     manager: { id: number; name: string } | null;
     effective_salary: number | null;
+    bank_name?: string | null;
+    bank_account_number?: string | null;
 }
 
 export interface EmployeeDetail {
@@ -290,3 +292,147 @@ export interface OvertimeRequestItem {
     reason: string;
     status: string;
 }
+
+export interface SalaryComponentItem {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    is_taxable: boolean;
+    is_bpjs_tk_base: boolean;
+    is_bpjs_kes_base: boolean;
+    default_amount: number;
+    is_active: boolean;
+    employee_components_count?: number;
+}
+
+export interface EmployeeSalaryComponentItem {
+    id: number;
+    employee_id: number;
+    salary_component_id: number;
+    amount: number;
+    component?: SalaryComponentItem;
+}
+
+export interface PayrollPeriodItem {
+    id: number;
+    name: string;
+    start_date: string;
+    end_date: string;
+    cut_off_date: string;
+    status: string;
+    runs?: PayrollRunItem[];
+}
+
+export interface PayrollRunItem {
+    id: number;
+    payroll_period_id: number;
+    branch_id: number | null;
+    total_gross: number;
+    total_net: number;
+    total_tax: number;
+    total_bpjs_company: number;
+    total_bpjs_employee: number;
+    status: string;
+    processed_at: string | null;
+    branch?: { id: number; name: string } | null;
+    period?: PayrollPeriodItem;
+    payslips?: PayslipItem[];
+}
+
+export interface PayslipItem {
+    id: number;
+    payroll_run_id: number;
+    employee_id: number;
+    basic_salary: number;
+    gross_income: number;
+    total_deductions: number;
+    take_home_pay: number;
+    overtime_pay: number;
+    tax_pph21_method: string;
+    tax_pph21_ter_category: string;
+    tax_pph21_rate: number;
+    tax_pph21_amount: number;
+    bpjs_jkk_company: number;
+    bpjs_jkm_company: number;
+    bpjs_jht_company: number;
+    bpjs_jht_employee: number;
+    bpjs_jp_company: number;
+    bpjs_jp_employee: number;
+    bpjs_kes_company: number;
+    bpjs_kes_employee: number;
+    loan_deduction: number;
+    components_snapshot: {
+        basic_salary: number;
+        allowances: Array<{ name: string; code: string; amount: number; is_taxable: boolean }>;
+        overtime: { hours: number; rate_per_hour: number; amount: number };
+        bpjs_company: { jkk: number; jkm: number; jht: number; jp: number; kes: number; total: number };
+        bpjs_employee: { jht: number; jp: number; kes: number; total: number };
+        tax_pph21: { method: string; ptkp: string; ter_category: string; rate: number; taxable_gross: number; tax_amount: number };
+        loan: { deduction: number; installment_id?: number | null; loan_id?: number | null };
+        other_deductions: Array<{ name: string; code: string; amount: number }>;
+        gross_income: number;
+        total_deductions: number;
+        take_home_pay: number;
+    };
+    is_published: boolean;
+    downloaded_at: string | null;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        bank_name?: string | null;
+        bank_account_number?: string | null;
+        bank_account_holder?: string | null;
+        tax_number?: string | null;
+        tax_ptkp_status?: string | null;
+        branch?: { id: number; name: string } | null;
+        department?: { id: number; name: string } | null;
+        position?: { id: number; name: string } | null;
+    };
+    run?: PayrollRunItem;
+}
+
+export interface LoanInstallmentItem {
+    id: number;
+    loan_id: number;
+    payroll_period_id: number | null;
+    installment_number: number;
+    amount: number;
+    is_paid: boolean;
+    paid_at: string | null;
+}
+
+export interface EmployeeLoanItem {
+    id: number;
+    employee_id: number;
+    loan_number: string;
+    total_amount: number;
+    installment_months: number;
+    monthly_amount: number;
+    remaining_amount: number;
+    start_month: string;
+    reason: string;
+    status: string;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        branch?: { name: string } | null;
+    };
+    installments?: LoanInstallmentItem[];
+}
+
+export interface BankDisbursementBatchItem {
+    id: number;
+    payroll_run_id: number;
+    bank_name: string;
+    batch_reference: string;
+    total_records: number;
+    total_amount: number;
+    file_path: string;
+    created_at: string;
+    payroll_run?: PayrollRunItem;
+    exported_by?: { name: string };
+}
+

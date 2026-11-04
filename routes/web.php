@@ -6,10 +6,14 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeLoanController;
 use App\Http\Controllers\EssAttendanceController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OvertimeController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\PayslipController;
+use App\Http\Controllers\SalaryComponentController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -44,6 +48,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/attendance', [EssAttendanceController::class, 'index'])->name('attendance');
         Route::post('/attendance/clock-in', [EssAttendanceController::class, 'clockIn'])->name('clock-in');
         Route::post('/attendance/clock-out', [EssAttendanceController::class, 'clockOut'])->name('clock-out');
+        Route::get('/payslips', [PayslipController::class, 'essPayslips'])->name('payslips');
+    });
+
+    Route::prefix('payroll')->name('payroll.')->group(function () {
+        Route::get('/', [PayrollController::class, 'index'])->name('index');
+        Route::post('/periods', [PayrollController::class, 'storePeriod'])->name('periods.store');
+        Route::post('/periods/{period}/process', [PayrollController::class, 'processRun'])->name('periods.process');
+        Route::post('/runs/{run}/lock', [PayrollController::class, 'lockRun'])->name('runs.lock');
+        Route::post('/runs/{run}/export-bank', [PayrollController::class, 'exportBank'])->name('runs.export-bank');
+        Route::get('/disbursements/{batch}/download', [PayrollController::class, 'downloadBatch'])->name('disbursements.download');
+        Route::get('/components', [SalaryComponentController::class, 'index'])->name('components.index');
+        Route::post('/components', [SalaryComponentController::class, 'store'])->name('components.store');
+        Route::put('/components/{component}', [SalaryComponentController::class, 'update'])->name('components.update');
+        Route::delete('/components/{component}', [SalaryComponentController::class, 'destroy'])->name('components.destroy');
+        Route::post('/components/assign', [SalaryComponentController::class, 'assignToEmployee'])->name('components.assign');
+    });
+
+    Route::prefix('payslips')->name('payslips.')->group(function () {
+        Route::get('/{payslip}', [PayslipController::class, 'show'])->name('show');
+        Route::post('/{payslip}/download', [PayslipController::class, 'download'])->name('download');
+    });
+
+    Route::prefix('loans')->name('loans.')->group(function () {
+        Route::get('/', [EmployeeLoanController::class, 'index'])->name('index');
+        Route::post('/', [EmployeeLoanController::class, 'store'])->name('store');
+        Route::post('/{loan}/approve', [EmployeeLoanController::class, 'approve'])->name('approve');
     });
 
     Route::prefix('leaves')->name('leaves.')->group(function () {
