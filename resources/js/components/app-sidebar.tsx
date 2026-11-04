@@ -1,15 +1,19 @@
 import { Link } from '@inertiajs/react';
 import {
+    Banknote,
     BookOpen,
     Building2,
     Calendar,
     CalendarCheck,
     CheckSquare,
     Clock,
+    CreditCard,
+    FileText,
     Flame,
     FolderGit2,
     GitBranch,
     LayoutGrid,
+    Receipt,
     ShieldAlert,
     Smartphone,
     Users,
@@ -50,6 +54,26 @@ const mainNavItems: NavItem[] = [
         title: 'Lembur (SPL)',
         href: '/overtime',
         icon: Flame,
+    },
+    {
+        title: 'Payroll & Gaji',
+        href: '/payroll',
+        icon: Banknote,
+    },
+    {
+        title: 'Komponen Gaji',
+        href: '/payroll/components',
+        icon: Receipt,
+    },
+    {
+        title: 'Slip Gaji Saya',
+        href: '/ess/payslips',
+        icon: FileText,
+    },
+    {
+        title: 'Pinjaman & Kasbon',
+        href: '/loans',
+        icon: CreditCard,
     },
     {
         title: 'Monitoring Presensi',
