@@ -157,5 +157,15 @@ class Employee extends Model
     {
         return $this->hasMany(ExperienceLetter::class);
     }
+
+    public function appraisals(): HasMany
+    {
+        return $this->hasMany(PerformanceAppraisal::class);
+    }
+
+    public function evaluationsGiven(): HasMany
+    {
+        return $this->hasMany(PerformanceAppraisal::class, 'evaluator_id');
+    }
 }
 
