@@ -436,3 +436,145 @@ export interface BankDisbursementBatchItem {
     exported_by?: { name: string };
 }
 
+export interface ReimbursementTypeItem {
+    id: number;
+    code: string;
+    name: string;
+    annual_limit: number;
+    requires_receipt: boolean;
+    is_active: boolean;
+    requests_count?: number;
+}
+
+export interface EmployeeReimbursementBalanceItem {
+    id: number;
+    employee_id: number;
+    reimbursement_type_id: number;
+    year: number;
+    allocated_amount: number;
+    used_amount: number;
+    remaining_amount: number;
+    type?: ReimbursementTypeItem;
+}
+
+export interface ReimbursementRequestItem {
+    id: number;
+    employee_id: number;
+    reimbursement_type_id: number;
+    claim_number: string;
+    receipt_date: string;
+    amount: number;
+    approved_amount: number;
+    description: string;
+    receipt_file_path: string | null;
+    status: string;
+    paid_at: string | null;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        branch?: { name: string } | null;
+    };
+    type?: ReimbursementTypeItem;
+    approved_by?: { name: string } | null;
+}
+
+export interface EmployeeAssetItem {
+    id: number;
+    employee_id: number;
+    asset_tag: string;
+    name: string;
+    category: string;
+    serial_number: string | null;
+    handover_date: string;
+    returned_date: string | null;
+    handover_condition: string;
+    return_condition: string | null;
+    bast_number: string | null;
+    status: string;
+    notes: string | null;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        branch?: { name: string } | null;
+        department?: { name: string } | null;
+    };
+}
+
+export interface ExitClearanceItemData {
+    id: number;
+    offboarding_request_id: number;
+    department: string;
+    item_name: string;
+    is_cleared: boolean;
+    cleared_at: string | null;
+    notes: string | null;
+    cleared_by?: { name: string } | null;
+}
+
+export interface SeveranceSettlementItem {
+    id: number;
+    offboarding_request_id: number;
+    base_salary: number;
+    service_years: number;
+    service_months: number;
+    up_multiplier: number;
+    up_amount: number;
+    upmk_multiplier: number;
+    upmk_amount: number;
+    uph_amount: number;
+    pkwt_compensation_amount: number;
+    total_gross_severance: number;
+    tax_pph21_severance: number;
+    net_severance: number;
+    status: string;
+    paid_at: string | null;
+}
+
+export interface ExperienceLetterItem {
+    id: number;
+    offboarding_request_id: number;
+    employee_id: number;
+    letter_number: string;
+    issued_date: string;
+    start_date: string;
+    end_date: string;
+    last_position: string;
+    last_department: string;
+    verification_token: string;
+    is_active: boolean;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        branch?: { name: string } | null;
+        department?: { name: string } | null;
+        position?: { name: string } | null;
+    };
+}
+
+export interface OffboardingRequestItem {
+    id: number;
+    employee_id: number;
+    type: string;
+    reason: string;
+    notice_date: string;
+    effective_date: string;
+    status: string;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        join_date: string;
+        branch?: { name: string } | null;
+        department?: { name: string } | null;
+        position?: { name: string } | null;
+    };
+    approved_by?: { name: string } | null;
+    clearance_items?: ExitClearanceItemData[];
+    severance?: SeveranceSettlementItem | null;
+    experience_letter?: ExperienceLetterItem | null;
+}
+
+
