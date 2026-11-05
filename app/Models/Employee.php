@@ -132,5 +132,30 @@ class Employee extends Model
     {
         return $this->hasMany(Payslip::class);
     }
+
+    public function reimbursementBalances(): HasMany
+    {
+        return $this->hasMany(EmployeeReimbursementBalance::class);
+    }
+
+    public function reimbursementRequests(): HasMany
+    {
+        return $this->hasMany(ReimbursementRequest::class);
+    }
+
+    public function assets(): HasMany
+    {
+        return $this->hasMany(EmployeeAsset::class);
+    }
+
+    public function offboardingRequests(): HasMany
+    {
+        return $this->hasMany(OffboardingRequest::class);
+    }
+
+    public function experienceLetters(): HasMany
+    {
+        return $this->hasMany(ExperienceLetter::class);
+    }
 }
 
