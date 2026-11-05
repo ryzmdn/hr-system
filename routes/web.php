@@ -5,18 +5,22 @@ declare(strict_types=1);
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\EmployeeAssetController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeLoanController;
 use App\Http\Controllers\EssAttendanceController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\OffboardingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayslipController;
+use App\Http\Controllers\ReimbursementController;
 use App\Http\Controllers\SalaryComponentController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::get('/verify/paklaring/{token}', [OffboardingController::class, 'showLetter'])->name('paklaring.verify');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
@@ -74,6 +78,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [EmployeeLoanController::class, 'index'])->name('index');
         Route::post('/', [EmployeeLoanController::class, 'store'])->name('store');
         Route::post('/{loan}/approve', [EmployeeLoanController::class, 'approve'])->name('approve');
+    });
+
+    Route::prefix('claims')->name('claims.')->group(function () {
+        Route::get('/', [ReimbursementController::class, 'index'])->name('index');
+        Route::post('/', [ReimbursementController::class, 'store'])->name('store');
+        Route::post('/types', [ReimbursementController::class, 'storeType'])->name('types.store');
+        Route::post('/{reimbursement}/approve', [ReimbursementController::class, 'approve'])->name('approve');
+        Route::post('/{reimbursement}/pay', [ReimbursementController::class, 'markPaid'])->name('pay');
+    });
+
+    Route::prefix('assets')->name('assets.')->group(function () {
+        Route::get('/', [EmployeeAssetController::class, 'index'])->name('index');
+        Route::post('/', [EmployeeAssetController::class, 'store'])->name('store');
+        Route::post('/{asset}/return', [EmployeeAssetController::class, 'returnAsset'])->name('return');
+    });
+
+    Route::prefix('offboarding')->name('offboarding.')->group(function () {
+        Route::get('/', [OffboardingController::class, 'index'])->name('index');
+        Route::post('/', [OffboardingController::class, 'store'])->name('store');
+        Route::get('/{offboarding}', [OffboardingController::class, 'show'])->name('show');
+        Route::post('/clearance/{item}/clear', [OffboardingController::class, 'clearItem'])->name('clearance.clear');
+        Route::post('/{offboarding}/finalize', [OffboardingController::class, 'finalize'])->name('finalize');
     });
 
     Route::prefix('leaves')->name('leaves.')->group(function () {
