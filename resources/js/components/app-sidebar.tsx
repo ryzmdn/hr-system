@@ -12,11 +12,14 @@ import {
     Flame,
     FolderGit2,
     GitBranch,
+    Laptop,
     LayoutGrid,
+    LogOut,
     Receipt,
     ShieldAlert,
     Smartphone,
     Users,
+    Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -74,6 +77,21 @@ const mainNavItems: NavItem[] = [
         title: 'Pinjaman & Kasbon',
         href: '/loans',
         icon: CreditCard,
+    },
+    {
+        title: 'Klaim & Reimbursement',
+        href: '/claims',
+        icon: Wallet,
+    },
+    {
+        title: 'Inventaris Aset',
+        href: '/assets',
+        icon: Laptop,
+    },
+    {
+        title: 'Offboarding & Pesangon',
+        href: '/offboarding',
+        icon: LogOut,
     },
     {
         title: 'Monitoring Presensi',
