@@ -9,12 +9,15 @@ use App\Http\Controllers\EmployeeAssetController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeLoanController;
 use App\Http\Controllers\EssAttendanceController;
+use App\Http\Controllers\ExecutiveAnalyticsController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OffboardingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayslipController;
+use App\Http\Controllers\PerformanceController;
+use App\Http\Controllers\RecruitmentController;
 use App\Http\Controllers\ReimbursementController;
 use App\Http\Controllers\SalaryComponentController;
 use Illuminate\Support\Facades\Route;
@@ -100,6 +103,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{offboarding}', [OffboardingController::class, 'show'])->name('show');
         Route::post('/clearance/{item}/clear', [OffboardingController::class, 'clearItem'])->name('clearance.clear');
         Route::post('/{offboarding}/finalize', [OffboardingController::class, 'finalize'])->name('finalize');
+    });
+
+    Route::prefix('recruitment')->name('recruitment.')->group(function () {
+        Route::get('/', [RecruitmentController::class, 'index'])->name('index');
+        Route::post('/postings', [RecruitmentController::class, 'storePosting'])->name('postings.store');
+        Route::post('/apply', [RecruitmentController::class, 'apply'])->name('apply');
+        Route::post('/candidates/{candidate}/stage', [RecruitmentController::class, 'updateStage'])->name('candidates.stage');
+        Route::post('/candidates/{candidate}/hire', [RecruitmentController::class, 'hire'])->name('candidates.hire');
+    });
+
+    Route::prefix('performance')->name('performance.')->group(function () {
+        Route::get('/', [PerformanceController::class, 'index'])->name('index');
+        Route::post('/periods', [PerformanceController::class, 'storePeriod'])->name('periods.store');
+        Route::post('/appraisals', [PerformanceController::class, 'storeAppraisal'])->name('appraisals.store');
+        Route::post('/appraisals/{appraisal}/evaluate', [PerformanceController::class, 'evaluate'])->name('appraisals.evaluate');
+    });
+
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/', [ExecutiveAnalyticsController::class, 'index'])->name('index');
+        Route::get('/wlkp/export', [ExecutiveAnalyticsController::class, 'exportWlkp'])->name('wlkp.export');
     });
 
     Route::prefix('leaves')->name('leaves.')->group(function () {
