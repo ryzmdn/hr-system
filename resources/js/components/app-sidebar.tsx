@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import {
     Banknote,
+    BarChart3,
     BookOpen,
     Building2,
     Calendar,
@@ -18,6 +19,8 @@ import {
     Receipt,
     ShieldAlert,
     Smartphone,
+    Target,
+    UserPlus,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -92,6 +95,21 @@ const mainNavItems: NavItem[] = [
         title: 'Offboarding & Pesangon',
         href: '/offboarding',
         icon: LogOut,
+    },
+    {
+        title: 'Rekrutmen & ATS',
+        href: '/recruitment',
+        icon: UserPlus,
+    },
+    {
+        title: 'Kinerja & KPI (OKR)',
+        href: '/performance',
+        icon: Target,
+    },
+    {
+        title: 'Analitik Eksekutif',
+        href: '/analytics',
+        icon: BarChart3,
     },
     {
         title: 'Monitoring Presensi',

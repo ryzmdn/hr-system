@@ -577,4 +577,127 @@ export interface OffboardingRequestItem {
     experience_letter?: ExperienceLetterItem | null;
 }
 
+export interface JobPostingItem {
+    id: number;
+    branch_id: number | null;
+    department_id: number | null;
+    position_id: number | null;
+    title: string;
+    slug: string;
+    employment_status: string;
+    quota: number;
+    min_experience_years: number;
+    salary_range_min: number;
+    salary_range_max: number;
+    description: string;
+    requirements: string | null;
+    status: string;
+    deadline_date: string | null;
+    candidates_count?: number;
+    branch?: { id: number; name: string } | null;
+    department?: { id: number; name: string } | null;
+    position?: { id: number; name: string } | null;
+}
+
+export interface CandidateItem {
+    id: number;
+    job_posting_id: number;
+    name: string;
+    email: string;
+    phone_number: string | null;
+    resume_file_path: string | null;
+    portfolio_url: string | null;
+    stage: string;
+    rating: number;
+    expected_salary: number;
+    offered_salary: number;
+    notes: string | null;
+    hired_employee_id: number | null;
+    job_posting?: JobPostingItem;
+    hired_employee?: { id: number; name: string; nik: string } | null;
+}
+
+export interface PerformancePeriodItem {
+    id: number;
+    name: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+    appraisals_count?: number;
+}
+
+export interface PerformanceAppraisalItemData {
+    id: number;
+    performance_appraisal_id: number;
+    kpi_name: string;
+    target_description: string | null;
+    weight_percentage: number;
+    target_value: number;
+    actual_value: number;
+    score: number;
+    weighted_score: number;
+}
+
+export interface PerformanceAppraisalRecord {
+    id: number;
+    performance_period_id: number;
+    employee_id: number;
+    evaluator_id: number | null;
+    overall_score: number;
+    rating_grade: string;
+    feedback: string | null;
+    status: string;
+    period?: PerformancePeriodItem;
+    employee?: {
+        id: number;
+        nik: string;
+        name: string;
+        branch?: { name: string } | null;
+        department?: { name: string } | null;
+    };
+    evaluator?: {
+        id: number;
+        nik: string;
+        name: string;
+    } | null;
+    items?: PerformanceAppraisalItemData[];
+}
+
+export interface ExecutiveMetricsData {
+    year: number;
+    headcount: {
+        total_active: number;
+        resigned_this_year: number;
+        turnover_rate: number;
+        pkwtt: number;
+        pkwt: number;
+        probation: number;
+        gender_male: number;
+        gender_female: number;
+    };
+    overtime_by_branch: Array<{
+        branch_id: number;
+        branch_name: string;
+        branch_code: string;
+        total_hours: number;
+        total_cost: number;
+    }>;
+    bradford_top_risk: Array<{
+        employee_id: number;
+        name: string;
+        nik: string;
+        spells: number;
+        total_days: number;
+        bradford_factor: number;
+        risk_level: string;
+    }>;
+    department_distribution: Array<{
+        department_id: number;
+        name: string;
+        code: string;
+        headcount: number;
+    }>;
+}
+
+
 
