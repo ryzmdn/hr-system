@@ -35,7 +35,7 @@ export default function PayslipShow({ payslip }: Props) {
     };
 
     const handlePrint = () => {
-        router.post(`/payslips/${payslip.id}/download`, {}, {
+        router.post(`/dashboard/payslips/${payslip.id}/download`, {}, {
             preserveScroll: true,
             onSuccess: () => {
                 window.print();
@@ -49,8 +49,8 @@ export default function PayslipShow({ payslip }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Payroll', href: '/payroll' },
-                { title: `Slip Gaji ${payslip.employee?.name}`, href: `/payslips/${payslip.id}` },
+                { title: 'Payroll', href: '/dashboard/payroll' },
+                { title: `Slip Gaji ${payslip.employee?.name}`, href: `/dashboard/payslips/${payslip.id}` },
             ]}
         >
             <Head title={`Slip Gaji - ${payslip.employee?.name}`} />

@@ -28,8 +28,8 @@ export default function ApprovalWorkflows({ workflows }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Pusat Approval', href: '/approvals' },
-                { title: 'Alur Workflow', href: '/approvals/workflows' },
+                { title: 'Pusat Approval', href: '/dashboard/approvals' },
+                { title: 'Alur Workflow', href: '/dashboard/approvals/workflows' },
             ]}
         >
             <Head title="Konfigurasi Alur Persetujuan (Workflow Engine)" />
@@ -44,7 +44,7 @@ export default function ApprovalWorkflows({ workflows }: Props) {
                             Visualisasi skema persetujuan berjenjang (multi-level approval) berdasarkan struktur jabatan dan otorisasi peran.
                         </p>
                     </div>
-                    <Link href="/approvals">
+                    <Link href="/dashboard/approvals">
                         <Button variant="outline" size="sm">
                             Buka Kotak Masuk Persetujuan
                         </Button>

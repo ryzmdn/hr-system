@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     CheckCircle2,
@@ -98,6 +98,12 @@ export default function ClaimsIndexPage({
     const totalUsed = balances.reduce((acc, b) => acc + b.used_amount, 0);
     const totalRemaining = balances.reduce((acc, b) => acc + b.remaining_amount, 0);
 
+    const { auth } = usePage<any>().props;
+    const isSuperAdmin = Boolean(auth?.user?.is_super_admin) || auth?.permissions?.includes('*');
+    const isFinance = auth?.user?.roles?.some((r: any) => r.code === 'finance_admin');
+    const canManageType = isSuperAdmin || isFinance || auth?.permissions?.includes('reimbursement.manage');
+    const canApprove = isSuperAdmin || isFinance || auth?.permissions?.includes('reimbursement.approve');
+
     const handleCreateClaim = (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData();
@@ -110,7 +116,7 @@ export default function ClaimsIndexPage({
             formData.append('receipt_file', receiptFile);
         }
 
-        router.post('/claims', formData as any, {
+        router.post('/dashboard/claims', formData as any, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setReceiptFile(null);
@@ -127,7 +133,7 @@ export default function ClaimsIndexPage({
 
     const handleCreateType = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/claims/types', typeForm, {
+        router.post('/dashboard/claims/types', typeForm, {
             onSuccess: () => {
                 setIsCreateTypeOpen(false);
                 setTypeForm({
@@ -143,7 +149,7 @@ export default function ClaimsIndexPage({
         e.preventDefault();
         if (!selectedClaim) return;
 
-        router.post(`/claims/${selectedClaim.id}/approve`, {
+        router.post(`/dashboard/claims/${selectedClaim.id}/approve`, {
             approved_amount: approvedAmount,
         }, {
             onSuccess: () => {
@@ -155,7 +161,7 @@ export default function ClaimsIndexPage({
 
     const handleMarkPaid = (id: number) => {
         if (confirm('Tandai klaim ini telah dibayarkan ke karyawan?')) {
-            router.post(`/claims/${id}/pay`);
+            router.post(`/dashboard/claims/${id}/pay`);
         }
     };
 
@@ -163,7 +169,7 @@ export default function ClaimsIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Klaim & Reimbursement', href: '/claims' },
+                { title: 'Klaim & Reimbursement', href: '/dashboard/claims' },
             ]}
         >
             <Head title="Klaim & Reimbursement Karyawan" />
@@ -180,14 +186,16 @@ export default function ClaimsIndexPage({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsCreateTypeOpen(true)}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Kategori Klaim Baru
-                        </Button>
+                        {canManageType && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsCreateTypeOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Kategori Klaim Baru
+                            </Button>
+                        )}
                         <Button
                             size="sm"
                             onClick={() => setIsCreateOpen(true)}
@@ -343,7 +351,7 @@ export default function ClaimsIndexPage({
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="flex items-center justify-end gap-1.5">
-                                                        {req.status === 'SUBMITTED' && (
+                                                        {req.status === 'SUBMITTED' && canApprove && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="outline"
@@ -357,7 +365,7 @@ export default function ClaimsIndexPage({
                                                                 Setujui
                                                             </Button>
                                                         )}
-                                                        {req.status === 'APPROVED' && (
+                                                        {req.status === 'APPROVED' && canApprove && (
                                                             <Button
                                                                 size="sm"
                                                                 variant="default"

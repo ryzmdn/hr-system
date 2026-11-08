@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Briefcase,
     Calendar,
@@ -66,6 +66,10 @@ export default function RecruitmentIndexPage({
     stages,
     postingStatuses,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManageRecruitment = isSuperAdmin || auth?.permissions?.includes('recruitment.manage');
+
     const [activeTab, setActiveTab] = useState<'postings' | 'candidates'>('postings');
     const [isCreatePostingOpen, setIsCreatePostingOpen] = useState(false);
     const [isApplyOpen, setIsApplyOpen] = useState(false);
@@ -119,7 +123,7 @@ export default function RecruitmentIndexPage({
 
     const handleCreatePosting = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/recruitment/postings', postingForm, {
+        router.post('/dashboard/recruitment/postings', postingForm, {
             onSuccess: () => {
                 setIsCreatePostingOpen(false);
                 setPostingForm({
@@ -153,7 +157,7 @@ export default function RecruitmentIndexPage({
             data.append('resume_file', resumeFile);
         }
 
-        router.post('/recruitment/apply', data as any, {
+        router.post('/dashboard/recruitment/apply', data as any, {
             onSuccess: () => {
                 setIsApplyOpen(false);
                 setResumeFile(null);
@@ -170,7 +174,7 @@ export default function RecruitmentIndexPage({
     };
 
     const handleUpdateStage = (candidateId: number, newStage: string) => {
-        router.post(`/recruitment/candidates/${candidateId}/stage`, {
+        router.post(`/dashboard/recruitment/candidates/${candidateId}/stage`, {
             stage: newStage,
         });
     };
@@ -179,7 +183,7 @@ export default function RecruitmentIndexPage({
         e.preventDefault();
         if (!selectedCandidate) return;
 
-        router.post(`/recruitment/candidates/${selectedCandidate.id}/hire`, hireForm, {
+        router.post(`/dashboard/recruitment/candidates/${selectedCandidate.id}/hire`, hireForm, {
             onSuccess: () => {
                 setIsHireOpen(false);
                 setSelectedCandidate(null);
@@ -191,7 +195,7 @@ export default function RecruitmentIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Rekrutmen & ATS', href: '/recruitment' },
+                { title: 'Rekrutmen & ATS', href: '/dashboard/recruitment' },
             ]}
         >
             <Head title="Rekrutmen & ATS (Applicant Tracking System)" />
@@ -207,23 +211,25 @@ export default function RecruitmentIndexPage({
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsApplyOpen(true)}
-                        >
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Input Pelamar Baru
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsCreatePostingOpen(true)}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Buka Lowongan Baru
-                        </Button>
-                    </div>
+                    {canManageRecruitment && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsApplyOpen(true)}
+                            >
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Input Pelamar Baru
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={() => setIsCreatePostingOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Buka Lowongan Baru
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -378,24 +384,30 @@ export default function RecruitmentIndexPage({
                                                         {cand.expected_salary > 0 ? formatRupiah(cand.expected_salary) : '-'}
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <Select
-                                                            value={cand.stage}
-                                                            onValueChange={(val) => handleUpdateStage(cand.id, val)}
-                                                        >
-                                                            <SelectTrigger className="h-8 text-xs w-44">
-                                                                <SelectValue />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {stages.map((s) => (
-                                                                    <SelectItem key={s.value} value={s.value}>
-                                                                        {s.label}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        {canManageRecruitment ? (
+                                                            <Select
+                                                                value={cand.stage}
+                                                                onValueChange={(val) => handleUpdateStage(cand.id, val)}
+                                                            >
+                                                                <SelectTrigger className="h-8 text-xs w-44">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {stages.map((s) => (
+                                                                        <SelectItem key={s.value} value={s.value}>
+                                                                            {s.label}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {cand.stage}
+                                                            </Badge>
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3 text-right">
-                                                        {cand.stage === 'OFFERING' && (
+                                                        {canManageRecruitment && cand.stage === 'OFFERING' && (
                                                             <Button
                                                                 size="sm"
                                                                 className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700"

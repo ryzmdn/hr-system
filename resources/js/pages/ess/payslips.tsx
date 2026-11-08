@@ -40,7 +40,7 @@ export default function EssPayslipsPage({ employee, payslips }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'ESS Portal', href: '/dashboard' },
-                { title: 'Slip Gaji Saya', href: '/ess/payslips' },
+                { title: 'Slip Gaji Saya', href: '/dashboard/ess/payslips' },
             ]}
         >
             <Head title="Slip Gaji Saya (ESS)" />
@@ -163,7 +163,7 @@ export default function EssPayslipsPage({ employee, payslips }: Props) {
                                                         </span>
                                                     </div>
 
-                                                    <Link href={`/payslips/${slip.id}`}>
+                                                    <Link href={`/dashboard/payslips/${slip.id}`}>
                                                         <Button size="sm">
                                                             <Eye className="mr-2 h-4 w-4" />
                                                             Buka Slip

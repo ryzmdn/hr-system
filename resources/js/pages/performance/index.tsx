@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Award,
     CheckCircle2,
@@ -58,6 +58,11 @@ export default function PerformanceIndexPage({
     ratingGrades,
     periodStatuses,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManagePerformance = isSuperAdmin || auth?.permissions?.includes('performance.manage');
+    const canEvaluatePerformance = isSuperAdmin || auth?.permissions?.includes('performance.evaluate');
+
     const [isCreatePeriodOpen, setIsCreatePeriodOpen] = useState(false);
     const [isCreateAppraisalOpen, setIsCreateAppraisalOpen] = useState(false);
     const [isEvaluateOpen, setIsEvaluateOpen] = useState(false);
@@ -91,7 +96,7 @@ export default function PerformanceIndexPage({
 
     const handleCreatePeriod = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/performance/periods', periodForm, {
+        router.post('/dashboard/performance/periods', periodForm, {
             onSuccess: () => {
                 setIsCreatePeriodOpen(false);
                 setPeriodForm({
@@ -105,7 +110,7 @@ export default function PerformanceIndexPage({
 
     const handleCreateAppraisal = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/performance/appraisals', appraisalForm, {
+        router.post('/dashboard/performance/appraisals', appraisalForm, {
             onSuccess: () => {
                 setIsCreateAppraisalOpen(false);
             },
@@ -127,7 +132,7 @@ export default function PerformanceIndexPage({
         e.preventDefault();
         if (!selectedAppraisal) return;
 
-        router.post(`/performance/appraisals/${selectedAppraisal.id}/evaluate`, {
+        router.post(`/dashboard/performance/appraisals/${selectedAppraisal.id}/evaluate`, {
             items: evaluateActuals,
             feedback: evaluateFeedback,
         }, {
@@ -142,7 +147,7 @@ export default function PerformanceIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Kinerja & KPI (OKR)', href: '/performance' },
+                { title: 'Kinerja & KPI (OKR)', href: '/dashboard/performance' },
             ]}
         >
             <Head title="Manajemen Kinerja & Penilaian KPI (OKR)" />
@@ -159,21 +164,25 @@ export default function PerformanceIndexPage({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsCreatePeriodOpen(true)}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Buka Periode Penilaian
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsCreateAppraisalOpen(true)}
-                        >
-                            <Target className="mr-2 h-4 w-4" />
-                            Tetapkan KPI Karyawan
-                        </Button>
+                        {canManagePerformance && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsCreatePeriodOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Buka Periode Penilaian
+                            </Button>
+                        )}
+                        {canEvaluatePerformance && (
+                            <Button
+                                size="sm"
+                                onClick={() => setIsCreateAppraisalOpen(true)}
+                            >
+                                <Target className="mr-2 h-4 w-4" />
+                                Tetapkan KPI Karyawan
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -299,14 +308,16 @@ export default function PerformanceIndexPage({
                                                     </Badge>
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="h-8 text-xs"
-                                                        onClick={() => handleOpenEvaluate(app)}
-                                                    >
-                                                        Evaluasi Nilai
-                                                    </Button>
+                                                    {canEvaluatePerformance && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 text-xs"
+                                                            onClick={() => handleOpenEvaluate(app)}
+                                                        >
+                                                            Evaluasi Nilai
+                                                        </Button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))

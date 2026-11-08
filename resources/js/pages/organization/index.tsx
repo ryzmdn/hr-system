@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     Building2,
     Clock,
@@ -61,6 +61,10 @@ export default function OrganizationIndex({
     timezones,
     jkkRiskGrades,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManageOrg = isSuperAdmin || auth?.permissions?.includes('org.manage');
+
     const [isBranchDialogOpen, setIsBranchDialogOpen] = useState(false);
     const [isDeptDialogOpen, setIsDeptDialogOpen] = useState(false);
     const [isPosDialogOpen, setIsPosDialogOpen] = useState(false);
@@ -94,7 +98,7 @@ export default function OrganizationIndex({
 
     const handleCreateBranch = (e: React.FormEvent) => {
         e.preventDefault();
-        branchForm.post('/organization/branches', {
+        branchForm.post('/dashboard/organization/branches', {
             onSuccess: () => {
                 setIsBranchDialogOpen(false);
                 branchForm.reset();
@@ -104,7 +108,7 @@ export default function OrganizationIndex({
 
     const handleCreateDepartment = (e: React.FormEvent) => {
         e.preventDefault();
-        deptForm.post('/organization/departments', {
+        deptForm.post('/dashboard/organization/departments', {
             onSuccess: () => {
                 setIsDeptDialogOpen(false);
                 deptForm.reset();
@@ -114,7 +118,7 @@ export default function OrganizationIndex({
 
     const handleCreatePosition = (e: React.FormEvent) => {
         e.preventDefault();
-        posForm.post('/organization/positions', {
+        posForm.post('/dashboard/organization/positions', {
             onSuccess: () => {
                 setIsPosDialogOpen(false);
                 posForm.reset();
@@ -126,7 +130,7 @@ export default function OrganizationIndex({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Organisasi & Cabang', href: '/organization' },
+                { title: 'Organisasi & Cabang', href: '/dashboard/organization' },
             ]}
         >
             <Head title="Struktur Organisasi & Cabang" />
@@ -141,6 +145,7 @@ export default function OrganizationIndex({
                             Kelola entitas perusahaan, kantor cabang dengan geofence & zona waktu (WIB/WITA/WIT), hierarki divisi, serta jenjang karir.
                         </p>
                     </div>
+                    {canManageOrg && (
                     <div className="flex flex-wrap items-center gap-2">
                         <Dialog open={isBranchDialogOpen} onOpenChange={setIsBranchDialogOpen}>
                             <DialogTrigger asChild>
@@ -452,6 +457,7 @@ export default function OrganizationIndex({
                             </DialogContent>
                         </Dialog>
                     </div>
+                    )}
                 </div>
 
                 <Card className="border-neutral-200 bg-white/70 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-900/70">

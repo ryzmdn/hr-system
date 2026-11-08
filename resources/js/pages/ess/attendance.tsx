@@ -187,7 +187,7 @@ export default function EssAttendance({
 
         setIsSubmitting(true);
         router.post(
-            `/ess/attendance/${type}`,
+            `/dashboard/ess/attendance/${type}`,
             {
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
@@ -210,7 +210,7 @@ export default function EssAttendance({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Presensi Mandiri (ESS)', href: '/ess/attendance' },
+                { title: 'Presensi Mandiri (ESS)', href: '/dashboard/ess/attendance' },
             ]}
         >
             <Head title="Presensi Mandiri (ESS Mobile)" />

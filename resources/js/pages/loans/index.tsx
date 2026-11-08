@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Calendar,
     CheckCircle2,
@@ -52,6 +52,10 @@ export default function LoansIndexPage({
     employees,
     loanStatuses,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canRequestLoan = isSuperAdmin || auth?.permissions?.includes('loan.request');
+
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [selectedLoan, setSelectedLoan] = useState<EmployeeLoanItem | null>(null);
 
@@ -83,7 +87,7 @@ export default function LoansIndexPage({
 
     const handleCreateLoan = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/loans', form, {
+        router.post('/dashboard/loans', form, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setForm({
@@ -101,7 +105,7 @@ export default function LoansIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Kasbon & Pinjaman Karyawan', href: '/loans' },
+                { title: 'Kasbon & Pinjaman Karyawan', href: '/dashboard/loans' },
             ]}
         >
             <Head title="Kasbon & Pinjaman Karyawan" />
@@ -117,10 +121,12 @@ export default function LoansIndexPage({
                         </p>
                     </div>
 
-                    <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Ajukan Kasbon Baru
-                    </Button>
+                    {canRequestLoan && (
+                        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Ajukan Kasbon Baru
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">

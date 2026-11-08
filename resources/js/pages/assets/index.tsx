@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
     CheckCircle2,
@@ -76,13 +76,16 @@ export default function AssetsIndexPage({
         notes: '',
     });
 
+    const { auth } = usePage<any>().props;
+    const canManageAsset = Boolean(auth?.user?.is_super_admin) || auth?.permissions?.includes('asset.manage') || auth?.permissions?.includes('*');
+
     const totalAssigned = assets.filter((a) => a.status === 'ASSIGNED').length;
     const totalReturned = assets.filter((a) => a.status === 'RETURNED').length;
     const totalDamaged = assets.filter((a) => a.status === 'DAMAGED').length;
 
     const handleCreateAsset = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/assets', createForm, {
+        router.post('/dashboard/assets', createForm, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setCreateForm({
@@ -103,7 +106,7 @@ export default function AssetsIndexPage({
         e.preventDefault();
         if (!selectedAsset) return;
 
-        router.post(`/assets/${selectedAsset.id}/return`, returnForm, {
+        router.post(`/dashboard/assets/${selectedAsset.id}/return`, returnForm, {
             onSuccess: () => {
                 setIsReturnOpen(false);
                 setSelectedAsset(null);
@@ -115,7 +118,7 @@ export default function AssetsIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Inventaris Aset', href: '/assets' },
+                { title: 'Inventaris Aset', href: '/dashboard/assets' },
             ]}
         >
             <Head title="Manajemen Aset & Inventaris Karyawan" />
@@ -131,10 +134,12 @@ export default function AssetsIndexPage({
                         </p>
                     </div>
 
-                    <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Serah Terima Aset Baru
-                    </Button>
+                    {canManageAsset && (
+                        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Serah Terima Aset Baru
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -263,7 +268,7 @@ export default function AssetsIndexPage({
                                                     </Badge>
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
-                                                    {asset.status === 'ASSIGNED' && (
+                                                    {asset.status === 'ASSIGNED' && canManageAsset && (
                                                         <Button
                                                             size="sm"
                                                             variant="outline"

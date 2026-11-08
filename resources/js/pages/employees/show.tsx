@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Building2,
@@ -69,6 +69,10 @@ export default function EmployeeShow({
     managers,
     careerChangeTypes,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManageTransition = isSuperAdmin || auth?.permissions?.includes('employee.update') || auth?.permissions?.includes('employee.manage');
+
     const [isTransitionOpen, setIsTransitionOpen] = useState(false);
 
     const transitionForm = useForm({
@@ -88,7 +92,7 @@ export default function EmployeeShow({
 
     const handleTransitionSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        transitionForm.post(`/employees/${employee.id}/transition`, {
+        transitionForm.post(`/dashboard/employees/${employee.id}/transition`, {
             onSuccess: () => {
                 setIsTransitionOpen(false);
                 transitionForm.reset();
@@ -100,8 +104,8 @@ export default function EmployeeShow({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Direktori Karyawan', href: '/employees' },
-                { title: employee.name, href: `/employees/${employee.id}` },
+                { title: 'Direktori Karyawan', href: '/dashboard/employees' },
+                { title: employee.name, href: `/dashboard/employees/${employee.id}` },
             ]}
         >
             <Head title={`Profil Karyawan - ${employee.name}`} />
@@ -109,7 +113,7 @@ export default function EmployeeShow({
             <div className="flex flex-1 flex-col gap-6 p-6 max-w-6xl mx-auto w-full">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href="/employees">
+                        <Link href="/dashboard/employees">
                             <Button variant="outline" size="sm" className="size-8 p-0">
                                 <ArrowLeft className="size-4" />
                             </Button>
@@ -132,14 +136,15 @@ export default function EmployeeShow({
                         </div>
                     </div>
 
-                    <Dialog open={isTransitionOpen} onOpenChange={setIsTransitionOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="gap-2">
-                                <TrendingUp className="size-4" />
-                                Catat Transisi Karir / Gaji
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-xl">
+                    {canManageTransition && (
+                        <Dialog open={isTransitionOpen} onOpenChange={setIsTransitionOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="gap-2">
+                                    <TrendingUp className="size-4" />
+                                    Catat Transisi Karir / Gaji
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-xl">
                             <DialogHeader>
                                 <DialogTitle>Perekaman Transisi Karir & Remunerasi</DialogTitle>
                                 <DialogDescription>
@@ -294,6 +299,7 @@ export default function EmployeeShow({
                             </form>
                         </DialogContent>
                     </Dialog>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

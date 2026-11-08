@@ -43,7 +43,7 @@ export default function AuditIndex({ logs, filters }: Props) {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/audit-logs', { event: eventFilter }, {
+        router.get('/dashboard/audit-logs', { event: eventFilter }, {
             preserveState: true,
             replace: true,
         });
@@ -53,7 +53,7 @@ export default function AuditIndex({ logs, filters }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Jejak Audit Log', href: '/audit-logs' },
+                { title: 'Jejak Audit Log', href: '/dashboard/audit-logs' },
             ]}
         >
             <Head title="Jejak Audit Keamanan & Kepatuhan" />

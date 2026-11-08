@@ -78,7 +78,7 @@ export default function ApprovalInbox({
         if (!selectedActionTx) return;
 
         if (actionType === 'approve') {
-            router.post(`/approvals/${selectedActionTx.id}/approve`, { remarks }, {
+            router.post(`/dashboard/approvals/${selectedActionTx.id}/approve`, { remarks }, {
                 onSuccess: () => {
                     setSelectedActionTx(null);
                     setActionType(null);
@@ -86,7 +86,7 @@ export default function ApprovalInbox({
                 },
             });
         } else if (actionType === 'reject') {
-            router.post(`/approvals/${selectedActionTx.id}/reject`, { remarks }, {
+            router.post(`/dashboard/approvals/${selectedActionTx.id}/reject`, { remarks }, {
                 onSuccess: () => {
                     setSelectedActionTx(null);
                     setActionType(null);
@@ -98,7 +98,7 @@ export default function ApprovalInbox({
 
     const handleCreateDelegation = (e: React.FormEvent) => {
         e.preventDefault();
-        delegationForm.post('/approvals/delegations', {
+        delegationForm.post('/dashboard/approvals/delegations', {
             onSuccess: () => {
                 setIsDelegationOpen(false);
                 delegationForm.reset();
@@ -108,7 +108,7 @@ export default function ApprovalInbox({
 
     const handleRevokeDelegation = (id: number) => {
         if (confirm('Apakah Anda yakin ingin menonaktifkan delegasi wewenang ini?')) {
-            router.delete(`/approvals/delegations/${id}`);
+            router.delete(`/dashboard/approvals/delegations/${id}`);
         }
     };
 
@@ -116,7 +116,7 @@ export default function ApprovalInbox({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Pusat Approval', href: '/approvals' },
+                { title: 'Pusat Approval', href: '/dashboard/approvals' },
             ]}
         >
             <Head title="Pusat Approval & Delegasi" />

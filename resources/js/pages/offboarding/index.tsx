@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowRight,
@@ -56,6 +56,10 @@ export default function OffboardingIndexPage({
     types,
     statuses,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManageOffboarding = isSuperAdmin || auth?.permissions?.includes('offboarding.manage');
+
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     const [form, setForm] = useState({
@@ -81,7 +85,7 @@ export default function OffboardingIndexPage({
 
     const handleCreateOffboarding = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/offboarding', form, {
+        router.post('/dashboard/offboarding', form, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setForm({
@@ -100,7 +104,7 @@ export default function OffboardingIndexPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Offboarding & Pesangon', href: '/offboarding' },
+                { title: 'Offboarding & Pesangon', href: '/dashboard/offboarding' },
             ]}
         >
             <Head title="Offboarding & Kalkulator Pesangon PP 35/2021" />
@@ -116,10 +120,12 @@ export default function OffboardingIndexPage({
                         </p>
                     </div>
 
-                    <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Inisiasi Offboarding Baru
-                    </Button>
+                    {canManageOffboarding && (
+                        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Inisiasi Offboarding Baru
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -247,7 +253,7 @@ export default function OffboardingIndexPage({
                                                         </Badge>
                                                     </td>
                                                     <td className="px-4 py-3 text-right">
-                                                        <Link href={`/offboarding/${req.id}`}>
+                                                        <Link href={`/dashboard/offboarding/${req.id}`}>
                                                             <Button variant="ghost" size="sm" className="h-8 text-xs">
                                                                 Detail & Clearance
                                                                 <ArrowRight className="ml-1 h-3.5 w-3.5" />

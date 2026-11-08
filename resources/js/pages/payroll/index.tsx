@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowDownToLine,
@@ -61,6 +61,10 @@ export default function PayrollIndex({
     recentBatches,
     bankFormats,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManagePayroll = isSuperAdmin || auth?.permissions?.includes('payroll.manage');
+
     const [isCreatePeriodOpen, setIsCreatePeriodOpen] = useState(false);
     const [newPeriodData, setNewPeriodData] = useState({
         name: '',
@@ -90,7 +94,7 @@ export default function PayrollIndex({
 
     const handleCreatePeriod = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/payroll/periods', newPeriodData, {
+        router.post('/dashboard/payroll/periods', newPeriodData, {
             onSuccess: () => {
                 setIsCreatePeriodOpen(false);
                 setNewPeriodData({
@@ -107,7 +111,7 @@ export default function PayrollIndex({
         if (!selectedPeriodId) return;
         setIsProcessing(true);
         router.post(
-            `/payroll/periods/${selectedPeriodId}/process`,
+            `/dashboard/payroll/periods/${selectedPeriodId}/process`,
             {
                 branch_id: selectedBranchId === 'all' ? null : selectedBranchId,
             },
@@ -126,14 +130,14 @@ export default function PayrollIndex({
                 'Kunci payroll ini? Slip gaji akan resmi dipublikasikan ke seluruh karyawan dan angsuran kasbon akan dipotong secara permanen.'
             )
         ) {
-            router.post(`/payroll/runs/${runId}/lock`);
+            router.post(`/dashboard/payroll/runs/${runId}/lock`);
         }
     };
 
     const handleExportBank = () => {
         if (!selectedRunId) return;
         router.post(
-            `/payroll/runs/${selectedRunId}/export-bank`,
+            `/dashboard/payroll/runs/${selectedRunId}/export-bank`,
             {
                 bank_name: selectedBankFormat,
             },
@@ -149,7 +153,7 @@ export default function PayrollIndex({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Payroll Finansial & PPh 21 TER', href: '/payroll' },
+                { title: 'Payroll Finansial & PPh 21 TER', href: '/dashboard/payroll' },
             ]}
         >
             <Head title="Payroll Finansial & PPh 21 TER" />
@@ -165,21 +169,23 @@ export default function PayrollIndex({
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Link href="/payroll/components">
-                            <Button variant="outline" size="sm">
-                                <DollarSign className="mr-2 h-4 w-4" />
-                                Komponen Gaji
+                    {canManagePayroll && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Link href="/dashboard/payroll/components">
+                                <Button variant="outline" size="sm">
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Komponen Gaji
+                                </Button>
+                            </Link>
+                            <Button
+                                size="sm"
+                                onClick={() => setIsCreatePeriodOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Buat Periode Baru
                             </Button>
-                        </Link>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsCreatePeriodOpen(true)}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Buat Periode Baru
-                        </Button>
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-4">
@@ -277,17 +283,19 @@ export default function PayrollIndex({
                                         <div className="text-xs text-neutral-500 mr-2">
                                             Rentang: {period.start_date} s/d {period.end_date} (Cut-off: {period.cut_off_date})
                                         </div>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => {
-                                                setSelectedPeriodId(period.id);
-                                                setIsProcessRunOpen(true);
-                                            }}
-                                        >
-                                            <RefreshCw className="mr-2 h-4 w-4" />
-                                            Hitung Payroll
-                                        </Button>
+                                        {canManagePayroll && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setSelectedPeriodId(period.id);
+                                                    setIsProcessRunOpen(true);
+                                                }}
+                                            >
+                                                <RefreshCw className="mr-2 h-4 w-4" />
+                                                Hitung Payroll
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </CardHeader>
@@ -319,29 +327,31 @@ export default function PayrollIndex({
                                                         </span>
                                                     </div>
 
-                                                    <div className="flex items-center gap-2">
-                                                        {run.status !== 'LOCKED' && (
+                                                    {canManagePayroll && (
+                                                        <div className="flex items-center gap-2">
+                                                            {run.status !== 'LOCKED' && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="default"
+                                                                    onClick={() => handleLockRun(run.id)}
+                                                                >
+                                                                    <Lock className="mr-2 h-4 w-4" />
+                                                                    Kunci & Terbitkan Slip
+                                                                </Button>
+                                                            )}
                                                             <Button
                                                                 size="sm"
-                                                                variant="default"
-                                                                onClick={() => handleLockRun(run.id)}
+                                                                variant="outline"
+                                                                onClick={() => {
+                                                                    setSelectedRunId(run.id);
+                                                                    setIsExportBankOpen(true);
+                                                                }}
                                                             >
-                                                                <Lock className="mr-2 h-4 w-4" />
-                                                                Kunci & Terbitkan Slip
+                                                                <ArrowDownToLine className="mr-2 h-4 w-4" />
+                                                                Export File Bank
                                                             </Button>
-                                                        )}
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                setSelectedRunId(run.id);
-                                                                setIsExportBankOpen(true);
-                                                            }}
-                                                        >
-                                                            <ArrowDownToLine className="mr-2 h-4 w-4" />
-                                                            Export File Bank
-                                                        </Button>
-                                                    </div>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-4 rounded-lg bg-neutral-50 p-4 dark:bg-neutral-900/60 sm:grid-cols-5 text-xs">
@@ -407,7 +417,7 @@ export default function PayrollIndex({
                                                                         {formatRupiah(slip.take_home_pay)}
                                                                     </td>
                                                                     <td className="px-4 py-3 text-right">
-                                                                        <Link href={`/payslips/${slip.id}`}>
+                                                                        <Link href={`/dashboard/payslips/${slip.id}`}>
                                                                             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
                                                                                 <Eye className="mr-1 h-3.5 w-3.5" />
                                                                                 Lihat Slip
@@ -470,7 +480,7 @@ export default function PayrollIndex({
                                                 </td>
                                                 <td className="px-4 py-3 text-neutral-500">{batch.exported_by?.name ?? '-'}</td>
                                                 <td className="px-4 py-3 text-right">
-                                                    <a href={`/payroll/disbursements/${batch.id}/download`}>
+                                                    <a href={`/dashboard/payroll/disbursements/${batch.id}/download`}>
                                                         <Button variant="outline" size="sm" className="h-8 text-xs">
                                                             <ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" />
                                                             CSV

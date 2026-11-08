@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowLeft,
@@ -47,6 +47,10 @@ interface Props {
 }
 
 export default function OffboardingShowPage({ offboarding }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManageOffboarding = isSuperAdmin || auth?.permissions?.includes('offboarding.manage');
+
     const [selectedItem, setSelectedItem] = useState<ExitClearanceItemData | null>(null);
     const [notes, setNotes] = useState('');
 
@@ -62,7 +66,7 @@ export default function OffboardingShowPage({ offboarding }: Props) {
         e.preventDefault();
         if (!selectedItem) return;
 
-        router.post(`/offboarding/clearance/${selectedItem.id}/clear`, {
+        router.post(`/dashboard/offboarding/clearance/${selectedItem.id}/clear`, {
             notes,
         }, {
             onSuccess: () => {
@@ -78,7 +82,7 @@ export default function OffboardingShowPage({ offboarding }: Props) {
                 'Selesaikan offboarding ini? Status karyawan akan diubah menjadi RESIGNED/TERMINATED, pesangon dicairkan, dan Surat Pengalaman Kerja (Paklaring) akan resmi diaktifkan.'
             )
         ) {
-            router.post(`/offboarding/${offboarding.id}/finalize`);
+            router.post(`/dashboard/offboarding/${offboarding.id}/finalize`);
         }
     };
 
@@ -97,8 +101,8 @@ export default function OffboardingShowPage({ offboarding }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Offboarding', href: '/offboarding' },
-                { title: offboarding.employee?.name ?? 'Detail Offboarding', href: `/offboarding/${offboarding.id}` },
+                { title: 'Offboarding', href: '/dashboard/offboarding' },
+                { title: offboarding.employee?.name ?? 'Detail Offboarding', href: `/dashboard/offboarding/${offboarding.id}` },
             ]}
         >
             <Head title={`Offboarding - ${offboarding.employee?.name}`} />
@@ -119,7 +123,7 @@ export default function OffboardingShowPage({ offboarding }: Props) {
                                 </Button>
                             </Link>
                         )}
-                        {offboarding.status !== 'COMPLETED' && (
+                        {canManageOffboarding && offboarding.status !== 'COMPLETED' && (
                             <Button
                                 size="sm"
                                 disabled={!allCleared}
@@ -227,7 +231,7 @@ export default function OffboardingShowPage({ offboarding }: Props) {
                                                         )}
                                                     </div>
 
-                                                    {!item.is_cleared && offboarding.status !== 'COMPLETED' && (
+                                                    {!item.is_cleared && offboarding.status !== 'COMPLETED' && canManageOffboarding && (
                                                         <Button
                                                             size="sm"
                                                             variant="outline"

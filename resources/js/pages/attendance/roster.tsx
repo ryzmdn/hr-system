@@ -106,7 +106,7 @@ export default function AttendanceRoster({
 
     const handleSaveRoster = (e: React.FormEvent) => {
         e.preventDefault();
-        rosterForm.post('/attendance/roster', {
+        rosterForm.post('/dashboard/attendance/roster', {
             onSuccess: () => {
                 setSelectedSlot(null);
             },
@@ -117,8 +117,8 @@ export default function AttendanceRoster({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Monitoring Presensi', href: '/attendance' },
-                { title: 'Jadwal & Roster Shift', href: '/attendance/roster' },
+                { title: 'Monitoring Presensi', href: '/dashboard/attendance' },
+                { title: 'Jadwal & Roster Shift', href: '/dashboard/attendance/roster' },
             ]}
         >
             <Head title="Manajemen Roster & Jadwal Shift Kerja" />
@@ -126,7 +126,7 @@ export default function AttendanceRoster({
             <div className="flex flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href="/attendance">
+                        <Link href="/dashboard/attendance">
                             <Button variant="outline" size="sm" className="size-8 p-0">
                                 <ArrowLeft className="size-4" />
                             </Button>

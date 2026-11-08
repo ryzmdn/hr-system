@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Briefcase,
     Building2,
@@ -49,6 +49,10 @@ export default function EmployeeIndex({
     departments,
     canViewSensitive,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canCreateEmployee = isSuperAdmin || auth?.permissions?.includes('employee.create') || auth?.permissions?.includes('employee.manage');
+
     const [search, setSearch] = useState(filters.search || '');
     const [branchId, setBranchId] = useState(filters.branch_id || 'all');
     const [departmentId, setDepartmentId] = useState(filters.department_id || 'all');
@@ -67,7 +71,7 @@ export default function EmployeeIndex({
             if (!query[k]) delete query[k];
         });
 
-        router.get('/employees', query, {
+        router.get('/dashboard/employees', query, {
             preserveState: true,
             replace: true,
         });
@@ -97,7 +101,7 @@ export default function EmployeeIndex({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Direktori Karyawan', href: '/employees' },
+                { title: 'Direktori Karyawan', href: '/dashboard/employees' },
             ]}
         >
             <Head title="Direktori Master Karyawan" />
@@ -112,12 +116,14 @@ export default function EmployeeIndex({
                             Pusat data karyawan enterprise, riwayat penugasan, dan catatan kepatuhan ketenagakerjaan.
                         </p>
                     </div>
-                    <Link href="/employees/create">
-                        <Button className="gap-1.5">
-                            <Plus className="size-4" />
-                            Tambah Karyawan
-                        </Button>
-                    </Link>
+                    {canCreateEmployee && (
+                        <Link href="/dashboard/employees/create">
+                            <Button className="gap-1.5">
+                                <Plus className="size-4" />
+                                Tambah Karyawan
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <Card className="border-neutral-200 dark:border-neutral-800">
@@ -262,7 +268,7 @@ export default function EmployeeIndex({
                                                 {getStatusBadge(emp.status)}
                                             </td>
                                             <td className="px-4 py-3 text-center">
-                                                <Link href={`/employees/${emp.id}`}>
+                                                <Link href={`/dashboard/employees/${emp.id}`}>
                                                     <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
                                                         <Eye className="size-3.5" />
                                                         Detail

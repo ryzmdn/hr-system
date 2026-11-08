@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
     Calendar,
@@ -61,12 +61,15 @@ export default function AttendanceIndex({
     branches,
     selectedBranchId,
 }: Props) {
+    const { auth } = usePage<any>().props;
+    const canManageRoster = Boolean(auth?.user?.is_super_admin) || auth?.permissions?.includes('attendance.manage') || auth?.permissions?.includes('*');
+
     const [branchId, setBranchId] = useState(selectedBranchId || 'all');
     const [selectedSelfieUrl, setSelectedSelfieUrl] = useState<string | null>(null);
 
     const handleBranchFilter = (val: string) => {
         setBranchId(val);
-        router.get('/attendance', val === 'all' ? {} : { branch_id: val }, {
+        router.get('/dashboard/attendance', val === 'all' ? {} : { branch_id: val }, {
             preserveState: true,
             replace: true,
         });
@@ -76,7 +79,7 @@ export default function AttendanceIndex({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Monitoring Presensi', href: '/attendance' },
+                { title: 'Monitoring Presensi', href: '/dashboard/attendance' },
             ]}
         >
             <Head title="Monitoring Presensi Karyawan Real-Time" />
@@ -107,12 +110,14 @@ export default function AttendanceIndex({
                             </SelectContent>
                         </Select>
 
-                        <Link href="/attendance/roster">
-                            <Button variant="outline" className="gap-2">
-                                <Calendar className="size-4" />
-                                Kelola Jadwal Roster
-                            </Button>
-                        </Link>
+                        {canManageRoster && (
+                            <Link href="/dashboard/attendance/roster">
+                                <Button variant="outline" className="gap-2">
+                                    <Calendar className="size-4" />
+                                    Kelola Jadwal Roster
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

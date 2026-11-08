@@ -49,14 +49,14 @@ interface Props {
 export default function AnalyticsIndexPage({ metrics, selectedYear }: Props) {
     const handleYearChange = (year: string) => {
         router.get(
-            '/analytics',
+            '/dashboard/analytics',
             { year: parseInt(year, 10) },
             { preserveState: true }
         );
     };
 
     const handleExportWlkp = () => {
-        window.location.href = '/analytics/wlkp/export';
+        window.location.href = '/dashboard/analytics/wlkp/export';
     };
 
     const formatCurrency = (val: number): string => {
@@ -103,7 +103,7 @@ export default function AnalyticsIndexPage({ metrics, selectedYear }: Props) {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Executive Analytics', href: '/analytics' },
+                { title: 'Executive Analytics', href: '/dashboard/analytics' },
             ]}
         >
             <Head title="Executive Analytics & Laporan WLKP" />

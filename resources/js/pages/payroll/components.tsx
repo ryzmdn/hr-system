@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     CheckCircle2,
     Edit2,
@@ -51,6 +51,10 @@ export default function SalaryComponentsPage({
     employees,
     componentTypes,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canManagePayroll = isSuperAdmin || auth?.permissions?.includes('payroll.manage');
+
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isAssignOpen, setIsAssignOpen] = useState(false);
 
@@ -81,7 +85,7 @@ export default function SalaryComponentsPage({
 
     const handleCreateComponent = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/payroll/components', componentForm, {
+        router.post('/dashboard/payroll/components', componentForm, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setComponentForm({
@@ -100,13 +104,13 @@ export default function SalaryComponentsPage({
 
     const handleDeleteComponent = (id: number) => {
         if (confirm('Hapus komponen gaji ini?')) {
-            router.delete(`/payroll/components/${id}`);
+            router.delete(`/dashboard/payroll/components/${id}`);
         }
     };
 
     const handleAssignToEmployee = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post('/payroll/components/assign', assignForm, {
+        router.post('/dashboard/payroll/components/assign', assignForm, {
             onSuccess: () => {
                 setIsAssignOpen(false);
                 setAssignForm({
@@ -122,8 +126,8 @@ export default function SalaryComponentsPage({
         <AppLayout
             breadcrumbs={[
                 { title: 'HRIS', href: '/dashboard' },
-                { title: 'Payroll', href: '/payroll' },
-                { title: 'Komponen Gaji & Tunjangan', href: '/payroll/components' },
+                { title: 'Payroll', href: '/dashboard/payroll' },
+                { title: 'Komponen Gaji & Tunjangan', href: '/dashboard/payroll/components' },
             ]}
         >
             <Head title="Master Komponen Gaji & Tunjangan" />
@@ -139,23 +143,25 @@ export default function SalaryComponentsPage({
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsAssignOpen(true)}
-                        >
-                            <Users className="mr-2 h-4 w-4" />
-                            Atur Tunjangan Karyawan
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsCreateOpen(true)}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Tambah Komponen Baru
-                        </Button>
-                    </div>
+                    {canManagePayroll && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsAssignOpen(true)}
+                            >
+                                <Users className="mr-2 h-4 w-4" />
+                                Atur Tunjangan Karyawan
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={() => setIsCreateOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Tambah Komponen Baru
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-3">
@@ -214,14 +220,16 @@ export default function SalaryComponentsPage({
                                                     {c.default_amount > 0 ? formatRupiah(c.default_amount) : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                                                        onClick={() => handleDeleteComponent(c.id)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    {canManagePayroll && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                                            onClick={() => handleDeleteComponent(c.id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

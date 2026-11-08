@@ -83,15 +83,15 @@ export default function EmployeeCreate({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        form.post('/employees');
+        form.post('/dashboard/employees');
     };
 
     return (
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Direktori Karyawan', href: '/employees' },
-                { title: 'Tambah Karyawan Baru', href: '/employees/create' },
+                { title: 'Direktori Karyawan', href: '/dashboard/employees' },
+                { title: 'Tambah Karyawan Baru', href: '/dashboard/employees/create' },
             ]}
         >
             <Head title="Tambah Karyawan Baru" />
@@ -99,7 +99,7 @@ export default function EmployeeCreate({
             <div className="flex flex-1 flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href="/employees">
+                        <Link href="/dashboard/employees">
                             <Button variant="outline" size="sm" className="size-8 p-0">
                                 <ArrowLeft className="size-4" />
                             </Button>
@@ -517,7 +517,7 @@ export default function EmployeeCreate({
                     </Card>
 
                     <div className="flex items-center justify-end gap-3 pt-2">
-                        <Link href="/employees">
+                        <Link href="/dashboard/employees">
                             <Button type="button" variant="outline">
                                 Batal
                             </Button>

@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     Calendar,
     Clock,
@@ -38,6 +38,10 @@ interface Props {
 }
 
 export default function OvertimeIndex({ overtimes, isManagerOrAdmin }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canRequestOvertime = isSuperAdmin || auth?.permissions?.includes('overtime.request');
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const form = useForm({
@@ -50,7 +54,7 @@ export default function OvertimeIndex({ overtimes, isManagerOrAdmin }: Props) {
 
     const handleCreateOvertime = (e: React.FormEvent) => {
         e.preventDefault();
-        form.post('/overtime', {
+        form.post('/dashboard/overtime', {
             onSuccess: () => {
                 setIsDialogOpen(false);
                 form.reset();
@@ -62,7 +66,7 @@ export default function OvertimeIndex({ overtimes, isManagerOrAdmin }: Props) {
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Surat Perintah Lembur (SPL)', href: '/overtime' },
+                { title: 'Surat Perintah Lembur (SPL)', href: '/dashboard/overtime' },
             ]}
         >
             <Head title="Manajemen Lembur (SPL PP 35/2021)" />
@@ -78,14 +82,15 @@ export default function OvertimeIndex({ overtimes, isManagerOrAdmin }: Props) {
                         </p>
                     </div>
 
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="gap-2">
-                                <Plus className="size-4" />
-                                Buat Pengajuan Lembur (SPL)
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
+                    {canRequestOvertime && (
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="gap-2">
+                                    <Plus className="size-4" />
+                                    Buat Pengajuan Lembur (SPL)
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Pengajuan Surat Perintah Lembur (SPL)</DialogTitle>
                                 <DialogDescription>
@@ -160,6 +165,7 @@ export default function OvertimeIndex({ overtimes, isManagerOrAdmin }: Props) {
                             </form>
                         </DialogContent>
                     </Dialog>
+                    )}
                 </div>
 
                 <Card className="border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/40">

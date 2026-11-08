@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     Calendar,
     CalendarCheck,
@@ -57,6 +57,10 @@ export default function LeaveIndex({
     requests,
     isManagerOrAdmin,
 }: Props) {
+    const { auth } = usePage<{ auth?: { user?: { role?: string }; permissions?: string[] } }>().props;
+    const isSuperAdmin = auth?.user?.role === 'super_admin' || auth?.permissions?.includes('*');
+    const canRequestLeave = isSuperAdmin || auth?.permissions?.includes('leave.request');
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const leaveForm = useForm({
@@ -69,7 +73,7 @@ export default function LeaveIndex({
 
     const handleCreateRequest = (e: React.FormEvent) => {
         e.preventDefault();
-        leaveForm.post('/leaves', {
+        leaveForm.post('/dashboard/leaves', {
             onSuccess: () => {
                 setIsDialogOpen(false);
                 leaveForm.reset();
@@ -81,7 +85,7 @@ export default function LeaveIndex({
         <AppLayout
             breadcrumbs={[
                 { title: 'Dashboard', href: '/dashboard' },
-                { title: 'Pengajuan Cuti', href: '/leaves' },
+                { title: 'Pengajuan Cuti', href: '/dashboard/leaves' },
             ]}
         >
             <Head title="Manajemen Cuti & Izin Karyawan" />
@@ -97,14 +101,15 @@ export default function LeaveIndex({
                         </p>
                     </div>
 
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="gap-2">
-                                <Plus className="size-4" />
-                                Ajukan Permohonan Cuti
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
+                    {canRequestLeave && (
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="gap-2">
+                                    <Plus className="size-4" />
+                                    Ajukan Permohonan Cuti
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Formulir Pengajuan Cuti / Izin</DialogTitle>
                                 <DialogDescription>
@@ -186,6 +191,7 @@ export default function LeaveIndex({
                             </form>
                         </DialogContent>
                     </Dialog>
+                    )}
                 </div>
 
                 {balances.length > 0 && (
