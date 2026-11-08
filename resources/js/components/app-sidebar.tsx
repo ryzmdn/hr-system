@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Banknote,
     BarChart3,
@@ -40,6 +40,22 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
+interface AuthUser {
+    id: number;
+    name: string;
+    email: string;
+    roles: Array<{ id: number; code: string; name: string }>;
+    is_super_admin: boolean;
+}
+
+interface PagePropsWithAuth {
+    auth: {
+        user: AuthUser | null;
+        permissions: string[];
+    };
+    [key: string]: unknown;
+}
+
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -48,103 +64,123 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'ESS Presensi Mobile',
-        href: '/ess/attendance',
+        href: '/dashboard/ess/attendance',
         icon: Smartphone,
+        permission: 'attendance.clock',
     },
     {
         title: 'Pengajuan Cuti',
-        href: '/leaves',
+        href: '/dashboard/leaves',
         icon: CalendarCheck,
+        permission: 'leave.view',
     },
     {
         title: 'Lembur (SPL)',
-        href: '/overtime',
+        href: '/dashboard/overtime',
         icon: Flame,
-    },
-    {
-        title: 'Payroll & Gaji',
-        href: '/payroll',
-        icon: Banknote,
-    },
-    {
-        title: 'Komponen Gaji',
-        href: '/payroll/components',
-        icon: Receipt,
+        permission: 'overtime.view',
     },
     {
         title: 'Slip Gaji Saya',
-        href: '/ess/payslips',
+        href: '/dashboard/ess/payslips',
         icon: FileText,
+        permission: 'payroll.view',
     },
     {
         title: 'Pinjaman & Kasbon',
-        href: '/loans',
+        href: '/dashboard/loans',
         icon: CreditCard,
+        permission: 'loan.view',
     },
     {
         title: 'Klaim & Reimbursement',
-        href: '/claims',
+        href: '/dashboard/claims',
         icon: Wallet,
-    },
-    {
-        title: 'Inventaris Aset',
-        href: '/assets',
-        icon: Laptop,
-    },
-    {
-        title: 'Offboarding & Pesangon',
-        href: '/offboarding',
-        icon: LogOut,
-    },
-    {
-        title: 'Rekrutmen & ATS',
-        href: '/recruitment',
-        icon: UserPlus,
-    },
-    {
-        title: 'Kinerja & KPI (OKR)',
-        href: '/performance',
-        icon: Target,
-    },
-    {
-        title: 'Analitik Eksekutif',
-        href: '/analytics',
-        icon: BarChart3,
-    },
-    {
-        title: 'Monitoring Presensi',
-        href: '/attendance',
-        icon: Clock,
-    },
-    {
-        title: 'Jadwal & Roster Shift',
-        href: '/attendance/roster',
-        icon: Calendar,
-    },
-    {
-        title: 'Direktori Karyawan',
-        href: '/employees',
-        icon: Users,
-    },
-    {
-        title: 'Organisasi & Cabang',
-        href: '/organization',
-        icon: Building2,
+        permission: 'reimbursement.view',
     },
     {
         title: 'Pusat Approval',
-        href: '/approvals',
+        href: '/dashboard/approvals',
         icon: CheckSquare,
+        permission: 'approval.inbox',
+    },
+    {
+        title: 'Monitoring Presensi',
+        href: '/dashboard/attendance',
+        icon: Clock,
+        permission: 'attendance.manage',
+    },
+    {
+        title: 'Jadwal & Roster Shift',
+        href: '/dashboard/attendance/roster',
+        icon: Calendar,
+        permission: 'attendance.manage',
+    },
+    {
+        title: 'Direktori Karyawan',
+        href: '/dashboard/employees',
+        icon: Users,
+        permission: 'employee.view',
+    },
+    {
+        title: 'Organisasi & Cabang',
+        href: '/dashboard/organization',
+        icon: Building2,
+        permission: 'org.view',
+    },
+    {
+        title: 'Payroll & Gaji',
+        href: '/dashboard/payroll',
+        icon: Banknote,
+        permission: 'payroll.calculate',
+    },
+    {
+        title: 'Komponen Gaji',
+        href: '/dashboard/payroll/components',
+        icon: Receipt,
+        permission: 'payroll.calculate',
+    },
+    {
+        title: 'Inventaris Aset',
+        href: '/dashboard/assets',
+        icon: Laptop,
+        permission: 'asset.view',
+    },
+    {
+        title: 'Offboarding & Pesangon',
+        href: '/dashboard/offboarding',
+        icon: LogOut,
+        permission: 'offboarding.manage',
+    },
+    {
+        title: 'Rekrutmen & ATS',
+        href: '/dashboard/recruitment',
+        icon: UserPlus,
+        permission: 'recruitment.view',
+    },
+    {
+        title: 'Kinerja & KPI (OKR)',
+        href: '/dashboard/performance',
+        icon: Target,
+        permission: 'performance.view',
+    },
+    {
+        title: 'Analitik Eksekutif',
+        href: '/dashboard/analytics',
+        icon: BarChart3,
+        permission: 'analytics.view',
     },
     {
         title: 'Alur Workflow',
-        href: '/approvals/workflows',
+        href: '/dashboard/approvals/workflows',
         icon: GitBranch,
+        permission: 'approval.manage_workflow',
     },
     {
         title: 'Jejak Audit Log',
-        href: '/audit-logs',
+        href: '/dashboard/audit-logs',
         icon: ShieldAlert,
+        permission: 'audit.view',
     },
 ];
 
@@ -156,12 +192,40 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Dokumentasi HRIS',
-        href: '/organization',
+        href: '/dashboard/organization',
         icon: BookOpen,
+        permission: 'org.view',
     },
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<PagePropsWithAuth>().props;
+    const permissions = auth?.permissions || [];
+    const isSuperAdmin = Boolean(auth?.user?.is_super_admin) || permissions.includes('*');
+
+    const filteredNavItems = mainNavItems.filter((item) => {
+        if (isSuperAdmin) {
+            return true;
+        }
+        if (item.permission && !permissions.includes(item.permission)) {
+            return false;
+        }
+        if (item.roles && !item.roles.some((r) => auth?.user?.roles?.some((ur) => ur.code === r))) {
+            return false;
+        }
+        return true;
+    });
+
+    const filteredFooterItems = footerNavItems.filter((item) => {
+        if (isSuperAdmin) {
+            return true;
+        }
+        if (item.permission && !permissions.includes(item.permission)) {
+            return false;
+        }
+        return true;
+    });
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -177,11 +241,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter items={filteredFooterItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
