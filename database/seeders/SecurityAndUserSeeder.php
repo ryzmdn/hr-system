@@ -21,6 +21,7 @@ class SecurityAndUserSeeder extends Seeder
             ['code' => 'employee.create', 'name' => 'Menambah Karyawan Baru', 'module' => 'EMPLOYEE'],
             ['code' => 'employee.edit', 'name' => 'Mengubah Data Karyawan', 'module' => 'EMPLOYEE'],
             ['code' => 'employee.delete', 'name' => 'Menonaktifkan Karyawan', 'module' => 'EMPLOYEE'],
+            ['code' => 'employee.manage', 'name' => 'Mengelola Karyawan & Karir', 'module' => 'EMPLOYEE'],
             ['code' => 'attendance.view', 'name' => 'Melihat Presensi & Kehadiran', 'module' => 'ATTENDANCE'],
             ['code' => 'attendance.clock', 'name' => 'Melakukan Clock-In / Clock-Out', 'module' => 'ATTENDANCE'],
             ['code' => 'attendance.manage', 'name' => 'Mengelola Shift & Roster Presensi', 'module' => 'ATTENDANCE'],
@@ -42,6 +43,7 @@ class SecurityAndUserSeeder extends Seeder
             ['code' => 'reimbursement.request', 'name' => 'Mengajukan Klaim Biaya', 'module' => 'REIMBURSEMENT'],
             ['code' => 'reimbursement.view', 'name' => 'Melihat Klaim Reimbursement', 'module' => 'REIMBURSEMENT'],
             ['code' => 'reimbursement.approve', 'name' => 'Menyetujui Klaim Reimbursement', 'module' => 'REIMBURSEMENT'],
+            ['code' => 'reimbursement.manage', 'name' => 'Mengelola Kategori Reimbursement', 'module' => 'REIMBURSEMENT'],
             ['code' => 'asset.view', 'name' => 'Melihat Inventaris Aset Karyawan', 'module' => 'ASSET'],
             ['code' => 'asset.manage', 'name' => 'Mengelola Serah Terima Aset & BAST', 'module' => 'ASSET'],
             ['code' => 'offboarding.manage', 'name' => 'Mengelola Permohonan Resign & Exit', 'module' => 'OFFBOARDING'],
@@ -53,6 +55,9 @@ class SecurityAndUserSeeder extends Seeder
             ['code' => 'performance.manage', 'name' => 'Mengelola Periode Kinerja', 'module' => 'PERFORMANCE'],
             ['code' => 'analytics.view', 'name' => 'Melihat Dashboard Eksekutif', 'module' => 'ANALYTICS'],
             ['code' => 'analytics.export', 'name' => 'Mengekspor Laporan WLKP Kemnaker', 'module' => 'ANALYTICS'],
+            ['code' => 'approval.inbox', 'name' => 'Melihat Kotak Masuk Approval', 'module' => 'APPROVAL'],
+            ['code' => 'approval.manage_workflow', 'name' => 'Mengelola Alur Workflow Persetujuan', 'module' => 'APPROVAL'],
+            ['code' => 'audit.view', 'name' => 'Melihat Jejak Audit Log Sistem', 'module' => 'AUDIT'],
         ];
 
         $permissionModels = [];
@@ -92,12 +97,13 @@ class SecurityAndUserSeeder extends Seeder
         $superAdminRole->permissions()->sync($allPermissionIds);
 
         $hrPermissions = collect($permissionModels)->filter(function (Permission $p) {
-            return in_array($p->module, ['ORGANIZATION', 'EMPLOYEE', 'ATTENDANCE', 'LEAVE', 'OVERTIME', 'OFFBOARDING', 'RECRUITMENT', 'PERFORMANCE', 'ANALYTICS']);
+            return in_array($p->module, ['ORGANIZATION', 'EMPLOYEE', 'ATTENDANCE', 'LEAVE', 'OVERTIME', 'OFFBOARDING', 'RECRUITMENT', 'PERFORMANCE', 'ANALYTICS', 'APPROVAL', 'AUDIT']);
         })->pluck('id')->all();
         $hrAdminRole->permissions()->sync($hrPermissions);
 
         $financePermissions = collect($permissionModels)->filter(function (Permission $p) {
-            return in_array($p->module, ['PAYROLL', 'LOAN', 'REIMBURSEMENT', 'ANALYTICS']);
+            return in_array($p->module, ['PAYROLL', 'LOAN', 'REIMBURSEMENT', 'ANALYTICS'])
+                || $p->code === 'approval.inbox';
         })->pluck('id')->all();
         $financeAdminRole->permissions()->sync($financePermissions);
 
@@ -106,13 +112,14 @@ class SecurityAndUserSeeder extends Seeder
                 'org.view', 'employee.view', 'attendance.view', 'attendance.clock', 'attendance.approve',
                 'leave.request', 'leave.view', 'leave.approve', 'overtime.request', 'overtime.view', 'overtime.approve',
                 'reimbursement.request', 'reimbursement.view', 'reimbursement.approve', 'performance.view', 'performance.evaluate',
+                'approval.inbox',
             ]);
         })->pluck('id')->all();
         $deptManagerRole->permissions()->sync($managerPermissions);
 
         $employeePermissions = collect($permissionModels)->filter(function (Permission $p) {
             return in_array($p->code, [
-                'attendance.clock', 'attendance.view', 'leave.request', 'leave.view',
+                'attendance.clock', 'leave.request', 'leave.view',
                 'overtime.request', 'overtime.view', 'payroll.view', 'loan.request', 'loan.view',
                 'reimbursement.request', 'reimbursement.view', 'performance.view',
             ]);
@@ -166,4 +173,3 @@ class SecurityAndUserSeeder extends Seeder
         }
     }
 }
-
